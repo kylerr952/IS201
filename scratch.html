@@ -5,127 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>2025 Corvette ZR1 | Hobby Page</title>
     
-    <style>
-        /* 1. Custom Background Gradient (Carbon Flash & Dark Red) */
-        body {
-            background: linear-gradient(135deg, #0f0f0f 0%, #2b0000 100%);
-            /* 2. Specific Font Family and Color */
-            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-            color: #e0e0e0;
-            margin: 0;
-            padding: 0;
-            line-height: 1.6;
-        }
-
-        /* 3. Three required layout positioning divs (header, content-box, footer) */
-        .page-header {
-            background-color: rgba(0, 0, 0, 0.9);
-            color: #e31837; /* Torch Red */
-            padding: 50px 20px;
-            text-align: center;
-            border-bottom: 5px solid #e31837;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
-        }
-
-        .content-box {
-            max-width: 900px;
-            margin: 40px auto;
-            padding: 40px;
-            background-color: rgba(20, 20, 20, 0.95);
-            border-radius: 8px;
-            box-shadow: 0 15px 40px rgba(0,0,0,0.9);
-            border: 1px solid #333;
-        }
-
-        .page-footer {
-            background-color: #050505;
-            color: #777;
-            text-align: center;
-            padding: 30px;
-            margin-top: 60px;
-            font-size: 0.9em;
-            border-top: 2px solid #e31837;
-        }
-
-        /* 4. Additional required style definitions */
-        a {
-            color: #ff4d4d;
-            text-decoration: none;
-            font-weight: bold;
-            transition: all 0.3s ease;
-        }
-
-        a:hover {
-            text-decoration: underline;
-            color: #ffffff;
-            text-shadow: 0 0 8px #e31837;
-        }
-
-        h2, h3 {
-            color: #ffffff;
-            border-bottom: 2px solid #e31837;
-            padding-bottom: 8px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .media-container {
-            text-align: center;
-            margin: 40px 0;
-        }
-
-        .car-image {
-            max-width: 100%;
-            height: auto;
-            border-radius: 4px;
-            border: 3px solid #e31837;
-            box-shadow: 0 8px 25px rgba(227, 24, 55, 0.3);
-        }
-
-        .nav-links {
-            margin-top: 25px;
-        }
-        
-        .nav-links a {
-            margin: 0 10px;
-            padding: 10px 20px;
-            background-color: #1a1a1a;
-            border: 1px solid #e31837;
-            border-radius: 4px;
-            color: #fff;
-            text-transform: uppercase;
-            font-size: 0.85em;
-        }
-        
-        .nav-links a:hover {
-            background-color: #e31837;
-            text-decoration: none;
-        }
-        
-        .tableau-wrapper {
-            overflow-x: auto; 
-            width: 100%;
-            margin-top: 20px;
-            background: #ffffff;
-            padding: 10px;
-            border-radius: 4px;
-        }
-        
-        .note-box {
-            background-color: #331414;
-            border-left: 4px solid #e31837;
-            padding: 15px;
-            margin-bottom: 20px;
-            font-size: 0.9em;
-        }
-    </style>
+    <!-- This links to your new external CSS file -->
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 
     <!-- Layout Div 1: Header -->
     <div class="page-header">
-        <h1 style="font-size: 3.5em; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 3px;">2025 Corvette ZR1</h1>
-        <p style="font-size: 1.3em; color: #fff; font-style: italic;">The 1,064-Horsepower American Hypercar.</p>
+        <h1>2025 Corvette ZR1</h1>
+        <p class="subtitle">The 1,064-Horsepower American Hypercar.</p>
         
         <div class="nav-links">
             <a href="index.html">← Back to Résumé</a>
@@ -159,27 +47,26 @@
             <li><strong>Carbon Fiber Everywhere:</strong> Even the wheels are available in full carbon fiber to reduce unsprung mass.</li>
         </ol>
 
-        <hr style="margin: 40px 0; border: 1px solid #333;">
+        <hr class="divider">
 
         <h3> Watch the Reveal</h3>
         
         <div class="media-container">
             <!-- Updated YouTube Embed: Direct video ID link to ensure it plays -->
             <p><em>Experience the unbelievable sound and engineering of the new Corvette:</em></p>
-            <iframe width="100%" height="450" style="max-width: 800px; border-radius: 8px; border: 1px solid #444;" src="https://www.youtube.com/embed/LGJbxUVYpBk" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+            <iframe width="100%" height="450" src="[https://www.youtube.com/embed/LGJbxUVYpBk](https://www.youtube.com/embed/LGJbxUVYpBk)" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
             
             <!-- Fallback link added below the video -->
-            <p style="font-size: 0.9em; margin-top: 15px;">
-                <em>If the video above is restricted by your browser, <a href="https://www.youtube.com/watch?v=LGJbxUVYpBk" target="_blank" style="color: #ff4d4d; text-decoration: underline;">click here to watch the ZR1 reveal directly on YouTube</a>.</em>
+            <p class="fallback-text">
+                <em>If the video above is restricted by your browser, <a href="[https://www.youtube.com/watch?v=LGJbxUVYpBk](https://www.youtube.com/watch?v=LGJbxUVYpBk)" target="_blank">click here to watch the ZR1 reveal directly on YouTube</a>.</em>
             </p>
         </div>
 
         <div class="media-container">
             <!-- Updated Image: C8 Corvette Placeholder -->
-            
         </div>
 
-        <hr style="margin: 40px 0; border: 1px solid #333;">
+        <hr class="divider">
 
         <!-- Anchor Link Destination -->
         <h3 id="tableau-data">Class Requirement: Data Visualization</h3>
@@ -215,7 +102,7 @@
                 vizElement.style.width='100%'; 
                 vizElement.style.height='900px'; 
                 var scriptElement = document.createElement('script');                    
-                scriptElement.src = 'https://public.tableau.com/javascripts/api/viz_v1.js';                    
+                scriptElement.src = '[https://public.tableau.com/javascripts/api/viz_v1.js](https://public.tableau.com/javascripts/api/viz_v1.js)';                    
                 vizElement.parentNode.insertBefore(scriptElement, vizElement);                
             </script>
         </div>
