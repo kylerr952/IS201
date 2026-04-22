@@ -1,112 +1,141 @@
-/* 1. Custom Background Gradient (Carbon Flash & Dark Red) */
+/* My Custom CSS File */
+
+/* 1. Custom Background Gradient & 2. Specific Font/Color Requirement */
 body {
-    background: linear-gradient(135deg, #0f0f0f 0%, #2b0000 100%);
-    /* 2. Specific Font Family and Color */
-    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-    color: #e0e0e0;
-    margin: 0;
-    padding: 0;
-    line-height: 1.6;
+    background-image: linear-gradient(to bottom right, #111111, #4a0000);
+    font-family: Arial, Helvetica, sans-serif;
+    color: #dddddd;
+    margin: 0px;
+    padding: 0px;
 }
 
-/* 3. Three required layout positioning divs (header, content-box, footer) */
+/* 3. Three Layout Divs Requirement */
+
+/* Layout Div 1 */
 .page-header {
-    background-color: rgba(0, 0, 0, 0.9);
-    color: #e31837; /* Torch Red */
-    padding: 50px 20px;
+    background-color: black;
+    color: #e31837; /* Corvette Torch Red */
     text-align: center;
-    border-bottom: 5px solid #e31837;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+    padding-top: 40px;
+    padding-bottom: 40px;
+    border-bottom: 4px solid #e31837;
 }
 
+.page-header h1 {
+    font-size: 45px;
+    margin-top: 0px;
+    margin-bottom: 10px;
+}
+
+/* Layout Div 2 */
 .content-box {
+    background-color: #1a1a1a;
+    width: 80%;
     max-width: 900px;
-    margin: 40px auto;
-    padding: 40px;
-    background-color: rgba(20, 20, 20, 0.95);
-    border-radius: 8px;
-    box-shadow: 0 15px 40px rgba(0,0,0,0.9);
-    border: 1px solid #333;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 40px;
+    margin-bottom: 40px;
+    padding: 30px;
+    border: 2px solid #444444;
+    box-shadow: 5px 5px 15px black;
 }
 
+/* Layout Div 3 */
 .page-footer {
-    background-color: #050505;
-    color: #777;
+    background-color: black;
+    color: #888888;
     text-align: center;
-    padding: 30px;
-    margin-top: 60px;
-    font-size: 0.9em;
+    padding: 20px;
+    margin-top: 50px;
     border-top: 2px solid #e31837;
 }
 
-/* 4. Additional required style definitions */
+
+/* 4. Additional Required Styles */
+
 a {
-    color: #ff4d4d;
+    color: red;
     text-decoration: none;
     font-weight: bold;
-    transition: all 0.3s ease;
 }
 
 a:hover {
+    color: white;
     text-decoration: underline;
-    color: #ffffff;
-    text-shadow: 0 0 8px #e31837;
 }
 
-h2, h3 {
-    color: #ffffff;
-    border-bottom: 2px solid #e31837;
-    padding-bottom: 8px;
-    text-transform: uppercase;
-    letter-spacing: 1px;
+h2 {
+    color: white;
+    border-bottom: 2px solid red;
+    padding-bottom: 5px;
 }
 
+h3 {
+    color: white;
+    text-decoration: underline;
+    margin-top: 30px;
+}
+
+p {
+    line-height: 1.5;
+    font-size: 16px;
+}
+
+ul, ol {
+    margin-bottom: 20px;
+    line-height: 1.5;
+}
+
+li {
+    margin-bottom: 5px;
+}
+
+/* Custom Image Styling */
+.car-image {
+    width: 100%;
+    border: 5px solid #e31837;
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
+/* Centers the video and images */
 .media-container {
     text-align: center;
-    margin: 40px 0;
+    margin-top: 30px;
+    margin-bottom: 30px;
 }
 
-.car-image {
-    max-width: 100%;
-    height: auto;
-    border-radius: 4px;
-    border: 3px solid #e31837;
-    box-shadow: 0 8px 25px rgba(227, 24, 55, 0.3);
-}
-
+/* Navigation Menu Buttons */
 .nav-links {
-    margin-top: 25px;
+    margin-top: 20px;
 }
 
 .nav-links a {
-    margin: 0 10px;
-    padding: 10px 20px;
-    background-color: #1a1a1a;
-    border: 1px solid #e31837;
-    border-radius: 4px;
-    color: #fff;
-    text-transform: uppercase;
-    font-size: 0.85em;
+    background-color: #333333;
+    color: white;
+    padding: 10px 15px;
+    margin-right: 10px;
+    border: 1px solid red;
+    display: inline-block;
 }
 
 .nav-links a:hover {
-    background-color: #e31837;
+    background-color: red;
     text-decoration: none;
 }
 
-.tableau-wrapper {
-    overflow-x: auto; 
-    width: 100%;
-    margin-top: 20px;
-    background: #ffffff;
-    padding: 10px;
-    border-radius: 4px;
+/* Note Box Styling */
+.note-box {
+    background-color: #400000;
+    padding: 15px;
+    border-left: 5px solid red;
+    margin-bottom: 15px;
 }
 
-.note-box {
-    background-color: #331414;
-    border-left: 4px solid #e31837;
-    padding: 15px;
-    margin-bottom: 20px;
-    font-size: 0.9em;
+/* Make sure Tableau data fits on screen */
+.tableau-wrapper {
+    background-color: white;
+    padding: 10px;
+    margin-top: 20px;
 }
