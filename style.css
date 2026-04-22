@@ -1,11 +1,15 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
 /* 1. Custom Background Gradient (Carbon Flash & Dark Red) */
 body {
     background: linear-gradient(135deg, #0f0f0f 0%, #2b0000 100%);
     /* 2. Specific Font Family and Color */
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
     color: #e0e0e0;
-    margin: 0;
-    padding: 0;
     line-height: 1.6;
 }
 
@@ -70,8 +74,23 @@ h2, h3 {
     color: #ffffff;
     border-bottom: 2px solid #e31837;
     padding-bottom: 8px;
+    margin-bottom: 15px;
+    margin-top: 25px;
     text-transform: uppercase;
     letter-spacing: 1px;
+}
+
+p {
+    margin-bottom: 15px;
+}
+
+ol, ul {
+    margin-left: 25px;
+    margin-bottom: 20px;
+}
+
+li {
+    margin-bottom: 8px;
 }
 
 hr.divider {
@@ -113,7 +132,8 @@ hr.divider {
 }
 
 .nav-links a {
-    margin: 0 10px;
+    display: inline-block;
+    margin: 5px 10px;
     padding: 10px 20px;
     background-color: #1a1a1a;
     border: 1px solid #e31837;
