@@ -1,0 +1,813 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZR1 Track Racer 3D</title>
+    <!-- Import Three.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-color: #000; 
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            user-select: none;
+        }
+
+        #game-ui {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            color: #fff;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+            pointer-events: none;
+            z-index: 10;
+            display: none; 
+        }
+
+        #game-ui h1 { 
+            margin: 0 0 5px 0; 
+            font-size: 36px; 
+            text-transform: uppercase; 
+            letter-spacing: 2px;
+            color: #fff;
+            text-shadow: 0 4px 6px rgba(0,0,0,0.8);
+        }
+        
+        #game-ui p { margin: 0 0 20px 0; font-size: 16px; color: #f0f0f0; }
+        
+        .stat-box { 
+            font-size: 22px; 
+            font-weight: bold; 
+            background: rgba(255,255,255,0.9); 
+            color: #111;
+            border-left: 5px solid #e31837; 
+            padding: 10px 20px; 
+            border-radius: 4px; 
+            display: inline-block; 
+            margin-right: 15px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            text-shadow: none;
+        }
+        
+        .stat-val { color: #e31837; }
+
+        #back-nav {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            z-index: 10;
+        }
+
+        #back-nav a {
+            background-color: #e31837;
+            color: white;
+            padding: 12px 25px;
+            text-decoration: none;
+            font-weight: bold;
+            border-radius: 4px;
+            border: 2px solid #b30022;
+            text-transform: uppercase;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            transition: all 0.3s ease;
+        }
+
+        #back-nav a:hover { 
+            background-color: #ff3355; 
+            box-shadow: 0 0 20px rgba(227, 24, 55, 0.6);
+        }
+
+        /* Screens */
+        .screen-overlay {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.85);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 20;
+            color: white;
+            text-align: center;
+        }
+
+        #start-screen h1 { font-size: 60px; color: #e31837; margin-bottom: 10px; text-transform: uppercase; font-style: italic;}
+        
+        .menu-options {
+            display: flex;
+            gap: 40px;
+            margin-bottom: 30px;
+            background: rgba(255,255,255,0.1);
+            padding: 20px 40px;
+            border-radius: 10px;
+            border: 1px solid #444;
+        }
+
+        .option-group h3 { margin: 0 0 10px 0; text-transform: uppercase; font-size: 18px; color: #ccc;}
+        
+        input[type="color"] {
+            width: 80px; height: 50px; border: none; cursor: pointer; background: transparent;
+        }
+        
+        select {
+            padding: 10px; font-size: 18px; border-radius: 5px; border: none;
+            background: #fff; cursor: pointer; font-weight: bold;
+        }
+
+        #start-screen p { font-size: 18px; margin-bottom: 30px; color: #ccc; }
+        .play-btn {
+            background: #e31837; color: white; border: none; padding: 15px 50px; font-size: 26px;
+            font-weight: bold; border-radius: 8px; cursor: pointer; text-transform: uppercase;
+            transition: 0.2s; box-shadow: 0 5px 15px rgba(227, 24, 55, 0.5);
+        }
+        .play-btn:hover { background: #ff3355; transform: scale(1.05); }
+
+        #game-over { display: none; }
+        #game-over h2 { font-size: 70px; margin: 0; color: #ff3333; text-transform: uppercase; font-style: italic;}
+
+        canvas { display: block; }
+    </style>
+</head>
+<body>
+
+    <!-- Audio Elements -->
+
+    <div id="start-screen" class="screen-overlay">
+        <h1>ZR1 Track Racer</h1>
+        
+        <div class="menu-options">
+            <div class="option-group">
+                <h3>Car Color</h3>
+                <input type="color" id="car-color" value="#e31837">
+            </div>
+            <div class="option-group">
+                <h3>Select Biome</h3>
+                <select id="biome-select">
+                    <option value="mountain">Mountain</option>
+                    <option value="desert">Desert</option>
+                    <option value="winter">Winter</option>
+                    <option value="beach">Beach</option>
+                </select>
+            </div>
+        </div>
+
+        <p><strong>S / DOWN</strong> = Accelerate Forward &nbsp;|&nbsp; <strong>W / UP</strong> = Brake & Reverse <br> <strong>E</strong> = Shift Gear UP &nbsp;|&nbsp; <strong>Q</strong> = Shift Gear DOWN &nbsp;|&nbsp; <strong>A / D</strong> = Steer</p>
+        <button class="play-btn" onclick="startGame()">Start Engine</button>
+    </div>
+
+    <div id="game-ui">
+        <h1>ZR1 Track Racer</h1>
+        <p id="sub-title">Beat the opponents to the finish line!</p>
+        <div class="stat-box" id="pos-box">Pos: <span id="pos-display" class="stat-val">1st</span></div>
+        <div class="stat-box" id="lap-box">Lap: <span id="lap-display" class="stat-val">1/3</span></div>
+        <div class="stat-box">Speed: <span id="speed-display" class="stat-val">0</span> MPH</div>
+        <div class="stat-box" id="gear-box">Gear: <span id="gear-display" class="stat-val">1</span></div>
+    </div>
+
+    <div id="back-nav">
+        <a href="scratch.html">Exit Game</a>
+    </div>
+
+    <div id="game-over" class="screen-overlay">
+        <h2>RACE OVER</h2>
+        <p style="margin-top: 20px;">The race has concluded.</p>
+        <button class="play-btn" onclick="location.reload()" style="margin-top: 20px;">Race Again</button>
+    </div>
+
+    <script>
+        // --- Game State ---
+        let gameRunning = false;
+        let isGameOver = false;
+        let raceFinished = false;
+        let inSecretWorld = false;
+        let scene, camera, renderer, playerCar, cars = [];
+        let speedLines = [];
+        let normalGroup, secretGroup;
+
+        // --- New Game Systems ---
+        let lastCrashTime = 0;
+        let currentGear = 1;
+        const gearMaxSpeeds = { 1: 0.003, 2: 0.006, 3: 0.009, 4: 0.012, 5: 0.016 };
+
+        // --- 1. Init Core Three.js ---
+        scene = new THREE.Scene();
+        camera = new THREE.PerspectiveCamera(65, window.innerWidth / window.innerHeight, 0.1, 3000);
+        renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        document.body.appendChild(renderer.domElement);
+
+        normalGroup = new THREE.Group();
+        secretGroup = new THREE.Group();
+        scene.add(normalGroup);
+        scene.add(secretGroup);
+        secretGroup.visible = false; // Hidden by default
+
+        const trackRadius = 300;
+        const trackWidth = 45;
+
+        // --- 2. Biome Data & Builder ---
+        const biomes = {
+            mountain: { sky: 0x87CEEB, ground: 0x3a7d22, track: 0x333333, light: 0xffffff, fogDensity: 0.003 },
+            desert:   { sky: 0xffa500, ground: 0xedc9af, track: 0x222222, light: 0xffeebb, fogDensity: 0.002 },
+            winter:   { sky: 0xcceeff, ground: 0xffffff, track: 0x555566, light: 0xddddff, fogDensity: 0.006 },
+            beach:    { sky: 0x00bfff, ground: 0x1e90ff, track: 0xdeb887, light: 0xffffff, fogDensity: 0.002 } 
+        };
+
+        function buildScenery(biomeType) {
+            const b = biomes[biomeType];
+            
+            // Environment Settings
+            scene.background = new THREE.Color(b.sky);
+            scene.fog = new THREE.FogExp2(b.sky, b.fogDensity);
+
+            // Lighting (Kept in global scene so it lights both worlds)
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+            scene.add(ambientLight);
+            const sunLight = new THREE.DirectionalLight(b.light, 1.2);
+            sunLight.position.set(100, 200, 50);
+            sunLight.castShadow = true;
+            sunLight.shadow.camera.left = -150; sunLight.shadow.camera.right = 150;
+            sunLight.shadow.camera.top = 150; sunLight.shadow.camera.bottom = -150;
+            scene.add(sunLight);
+
+            // Ground
+            const groundGeo = new THREE.PlaneGeometry(3000, 3000);
+            const groundMat = new THREE.MeshStandardMaterial({ color: b.ground, roughness: 1.0 }); 
+            const ground = new THREE.Mesh(groundGeo, groundMat);
+            ground.rotation.x = -Math.PI / 2;
+            ground.receiveShadow = true;
+            normalGroup.add(ground);
+
+            // Track Surface
+            const trackGeo = new THREE.RingGeometry(trackRadius - trackWidth/2, trackRadius + trackWidth/2, 128);
+            trackGeo.rotateX(-Math.PI / 2);
+            const trackMat = new THREE.MeshStandardMaterial({ 
+                color: b.track, roughness: 0.9, polygonOffset: true, polygonOffsetFactor: -1 
+            });
+            const track = new THREE.Mesh(trackGeo, trackMat);
+            track.position.y = 0.05;
+            track.receiveShadow = true;
+            normalGroup.add(track);
+
+            // Center Track Dashed Lines 
+            const lineGeo = new THREE.BoxGeometry(0.5, 0.1, 8); 
+            const lineMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.5 });
+            for(let i=0; i<60; i++) { 
+                const angle = (i / 60) * Math.PI * 2;
+                const line = new THREE.Mesh(lineGeo, lineMat);
+                line.position.set(trackRadius * Math.cos(angle), 0.1, trackRadius * -Math.sin(angle));
+                line.rotation.y = angle; 
+                line.receiveShadow = true;
+                normalGroup.add(line);
+            }
+
+            // Edge Curbs 
+            const curbGeo = new THREE.BoxGeometry(2, 0.2, 8);
+            const redMat = new THREE.MeshStandardMaterial({ color: 0xff0000 });
+            const whiteMat = new THREE.MeshStandardMaterial({ color: 0xffffff });
+            
+            for(let i=0; i<180; i++) {
+                const angle = (i / 180) * Math.PI * 2;
+                const mat = i % 2 === 0 ? redMat : whiteMat;
+                
+                const innerCurb = new THREE.Mesh(curbGeo, mat);
+                innerCurb.position.set((trackRadius - trackWidth/2) * Math.cos(angle), 0.1, (trackRadius - trackWidth/2) * -Math.sin(angle));
+                innerCurb.rotation.y = angle; 
+                normalGroup.add(innerCurb);
+
+                const outerCurb = new THREE.Mesh(curbGeo, mat);
+                outerCurb.position.set((trackRadius + trackWidth/2) * Math.cos(angle), 0.1, (trackRadius + trackWidth/2) * -Math.sin(angle));
+                outerCurb.rotation.y = angle; 
+                normalGroup.add(outerCurb);
+            }
+
+            // Start/Finish Line Indicator
+            const finishGeo = new THREE.BoxGeometry(trackWidth, 0.15, 3);
+            const finishMat = new THREE.MeshStandardMaterial({ color: 0xffffff });
+            const finishLine = new THREE.Mesh(finishGeo, finishMat);
+            finishLine.position.set(trackRadius, 0.08, 0); 
+            normalGroup.add(finishLine);
+
+            // --- THE SECRET TURN SIGN ---
+            const signCanvas = document.createElement('canvas');
+            signCanvas.width = 512; signCanvas.height = 256;
+            const ctx = signCanvas.getContext('2d');
+            ctx.fillStyle = '#ffea00'; // Bright Yellow
+            ctx.fillRect(0, 0, 512, 256);
+            ctx.strokeStyle = '#000'; ctx.lineWidth = 15;
+            ctx.strokeRect(7, 7, 498, 242);
+            ctx.fillStyle = '#000'; ctx.font = 'bold 50px Arial'; ctx.textAlign = 'center';
+            ctx.fillText('SECRET TURN', 256, 100);
+            ctx.font = 'bold 80px Arial';
+            ctx.fillText('<===', 256, 200); // Now points LEFT
+
+            const signTex = new THREE.CanvasTexture(signCanvas);
+            const signGeoBox = new THREE.BoxGeometry(20, 10, 1);
+            const signMatBox = new THREE.MeshBasicMaterial({ map: signTex });
+            const signMesh = new THREE.Mesh(signGeoBox, signMatBox);
+
+            const signAngle = Math.PI; // Place exactly halfway around the track
+            // Moved sign to the INNER left edge of the track
+            signMesh.position.set((trackRadius - 35) * Math.cos(signAngle), 5, (trackRadius - 35) * -Math.sin(signAngle));
+            // Ensure the front of the sign faces oncoming traffic
+            signMesh.lookAt(signMesh.position.x, 5, signMesh.position.z + 100);
+            normalGroup.add(signMesh);
+
+            // Decorator Function for Biome Trees
+            function createDecorator() {
+                const group = new THREE.Group();
+                if (biomeType === 'mountain' || biomeType === 'winter') {
+                    const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.5, 3), new THREE.MeshStandardMaterial({ color: 0x5c4033 }));
+                    trunk.position.y = 1.5; trunk.castShadow = true; group.add(trunk);
+                    const leafColor = biomeType === 'winter' ? 0xffffff : 0x2d5a1e;
+                    const leaves = new THREE.Mesh(new THREE.ConeGeometry(3, 7, 8), new THREE.MeshStandardMaterial({ color: leafColor }));
+                    leaves.position.y = 5; leaves.castShadow = true; group.add(leaves);
+                } 
+                else if (biomeType === 'desert') {
+                    const cacMat = new THREE.MeshStandardMaterial({ color: 0x4a7c32 });
+                    const main = new THREE.Mesh(new THREE.CylinderGeometry(0.6, 0.6, 6), cacMat);
+                    main.position.y = 3; main.castShadow = true; group.add(main);
+                    const arm1 = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.4, 2), cacMat);
+                    arm1.position.set(1, 4, 0); arm1.rotation.z = Math.PI/2; arm1.castShadow = true; group.add(arm1);
+                    const arm2 = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.4, 2), cacMat);
+                    arm2.position.set(2, 5, 0); arm2.castShadow = true; group.add(arm2);
+                } 
+                else if (biomeType === 'beach') {
+                    const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.6, 8), new THREE.MeshStandardMaterial({ color: 0x8b5a2b }));
+                    trunk.position.y = 4; trunk.rotation.z = 0.2; trunk.castShadow = true; group.add(trunk);
+                    const leafMat = new THREE.MeshStandardMaterial({ color: 0x32cd32 });
+                    for(let j=0; j<5; j++) {
+                        const leaf = new THREE.Mesh(new THREE.PlaneGeometry(1.5, 5), leafMat);
+                        leaf.position.set(-0.5, 8, 0);
+                        leaf.rotation.x = -Math.PI/2;
+                        leaf.rotation.y = (j/5) * Math.PI * 2;
+                        leaf.rotation.z = 0.5;
+                        group.add(leaf);
+                    }
+                }
+                return group;
+            }
+
+            // Scatter Scenery
+            for(let i=0; i<150; i++) {
+                const angle = (i / 150) * Math.PI * 2;
+                // Leave a gap near the secret sign so player can drive through!
+                if (Math.abs(angle - Math.PI) < 0.15) continue; 
+
+                const outer = createDecorator();
+                outer.position.set((trackRadius + 35 + Math.random()*30) * Math.cos(angle), 0, (trackRadius + 35 + Math.random()*30) * -Math.sin(angle));
+                normalGroup.add(outer);
+                
+                const inner = createDecorator();
+                inner.position.set((trackRadius - 35 - Math.random()*30) * Math.cos(angle), 0, (trackRadius - 35 - Math.random()*30) * -Math.sin(angle));
+                normalGroup.add(inner);
+            }
+        }
+
+        // --- 2.5 Secret World Builder ---
+        function buildSecretWorld() {
+            // Magical glowing ground
+            const groundGeo = new THREE.PlaneGeometry(10000, 10000);
+            const groundMat = new THREE.MeshStandardMaterial({ color: 0xff99cc, roughness: 0.4, metalness: 0.1 }); 
+            const ground = new THREE.Mesh(groundGeo, groundMat);
+            ground.rotation.x = -Math.PI / 2;
+            ground.receiveShadow = true;
+            secretGroup.add(ground);
+
+            // Rainbows
+            const colors = [0xff0000, 0xff7f00, 0xffff00, 0x00ff00, 0x0000ff, 0x4b0082, 0x9400d3];
+            for(let i=0; i<30; i++) {
+                const rGroup = new THREE.Group();
+                for(let c=0; c<colors.length; c++) {
+                    const rGeo = new THREE.TorusGeometry(80 + c*4, 4, 16, 100, Math.PI);
+                    const rMat = new THREE.MeshBasicMaterial({ color: colors[c], side: THREE.DoubleSide });
+                    const rMesh = new THREE.Mesh(rGeo, rMat);
+                    rGroup.add(rMesh);
+                }
+                rGroup.position.set((Math.random()-0.5)*4000, -5, (Math.random()-0.5)*4000);
+                rGroup.rotation.y = Math.random() * Math.PI * 2;
+                secretGroup.add(rGroup);
+            }
+
+            // Giant Scattered Jelly Beans
+            const beanColors = [0xff0055, 0x00ffcc, 0xffee00, 0xaa00ff, 0xff8800];
+            const beanGeo = new THREE.SphereGeometry(3, 32, 32);
+            for(let i=0; i<600; i++) {
+                const bMat = new THREE.MeshStandardMaterial({ 
+                    color: beanColors[Math.floor(Math.random()*beanColors.length)], 
+                    roughness: 0.2, metalness: 0.2 
+                });
+                const bean = new THREE.Mesh(beanGeo, bMat);
+                bean.scale.set(1, 0.6, 1.8);
+                bean.position.set((Math.random()-0.5)*4000, 1.8, (Math.random()-0.5)*4000);
+                bean.rotation.y = Math.random() * Math.PI;
+                bean.rotation.x = (Math.random() - 0.5) * 0.5;
+                bean.castShadow = true;
+                secretGroup.add(bean);
+            }
+        }
+
+        // --- 3. Advanced Corvette Builder ---
+        function createCar(mainColorHex) {
+            const carGroup = new THREE.Group();
+            const bodyMat = new THREE.MeshStandardMaterial({ color: mainColorHex, roughness: 0.1, metalness: 0.7 });
+            const blackMat = new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.5 });
+            const glassMat = new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.1, metalness: 0.9 });
+            const grillMat = new THREE.MeshStandardMaterial({ color: 0x050505 });
+
+            // Main Lower Body (Sleeker wedge)
+            const bodyGeo = new THREE.BoxGeometry(3.6, 0.6, 8.5);
+            const body = new THREE.Mesh(bodyGeo, bodyMat);
+            body.position.y = 0.5;
+            body.castShadow = true;
+            carGroup.add(body);
+
+            // Wide Rear Fenders (ZR1 Aggressive look)
+            const rearGeo = new THREE.BoxGeometry(4.2, 0.8, 3.5);
+            const rear = new THREE.Mesh(rearGeo, bodyMat);
+            rear.position.set(0, 0.55, 2.5);
+            rear.castShadow = true;
+            carGroup.add(rear);
+
+            // Front Grill
+            const grillGeo = new THREE.BoxGeometry(2.5, 0.3, 0.1);
+            const grill = new THREE.Mesh(grillGeo, grillMat);
+            grill.position.set(0, 0.4, -4.26);
+            carGroup.add(grill);
+
+            // Slanted Cabin
+            const cabGeo = new THREE.BoxGeometry(2.6, 0.7, 3.5);
+            const cabin = new THREE.Mesh(cabGeo, glassMat);
+            cabin.position.set(0, 1.15, 0.2);
+            cabin.castShadow = true;
+            carGroup.add(cabin);
+
+            // Glowing Tail Lights
+            const tailMat = new THREE.MeshStandardMaterial({ color: 0xff0000, emissive: 0xff0000 });
+            const tailGeo = new THREE.BoxGeometry(1.2, 0.2, 0.1);
+            const tL = new THREE.Mesh(tailGeo, tailMat);
+            tL.position.set(1.4, 0.6, 4.26);
+            const tR = new THREE.Mesh(tailGeo, tailMat);
+            tR.position.set(-1.4, 0.6, 4.26);
+            carGroup.add(tL, tR);
+
+            // Massive High Wing Spoiler
+            const spoilerGeo = new THREE.BoxGeometry(4.4, 0.1, 1.2);
+            const spoiler = new THREE.Mesh(spoilerGeo, blackMat);
+            spoiler.position.set(0, 1.6, 3.8);
+            spoiler.castShadow = true;
+            carGroup.add(spoiler);
+            
+            const strutGeo = new THREE.BoxGeometry(0.1, 0.6, 0.4);
+            const strut1 = new THREE.Mesh(strutGeo, blackMat);
+            strut1.position.set(1.2, 1.2, 3.8);
+            const strut2 = strut1.clone();
+            strut2.position.set(-1.2, 1.2, 3.8);
+            carGroup.add(strut1, strut2);
+
+            // Wheels
+            const wheelGeo = new THREE.CylinderGeometry(0.7, 0.7, 0.8, 16);
+            wheelGeo.rotateZ(Math.PI / 2);
+            const wheels = [];
+            
+            const positions = [
+                [-1.9, 0.7, -2.5], [1.9, 0.7, -2.5], 
+                [-2.1, 0.7, 2.5],  [2.1, 0.7, 2.5]   
+            ];
+
+            positions.forEach(pos => {
+                const wheel = new THREE.Mesh(wheelGeo, blackMat);
+                wheel.position.set(...pos);
+                wheel.castShadow = true;
+                carGroup.add(wheel);
+                wheels.push(wheel);
+            });
+            carGroup.userData.wheels = wheels; 
+
+            return carGroup;
+        }
+
+        // --- 4. Optical Flow Effect (Speed Lines) ---
+        const speedLineGeo = new THREE.BoxGeometry(0.05, 0.05, 4);
+        const speedLineMat = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.5 });
+        const speedLineGroup = new THREE.Group();
+        
+        for(let i=0; i<40; i++) {
+            const line = new THREE.Mesh(speedLineGeo, speedLineMat);
+            // Scatter them around the camera space
+            line.position.set((Math.random()-0.5)*30, (Math.random())*10, -Math.random()*100);
+            speedLineGroup.add(line);
+            speedLines.push(line);
+        }
+        camera.add(speedLineGroup); // Attach to camera so they travel with the player
+
+        // --- 5. Start Game Initialization ---
+        function startGame() {
+            // Get user choices
+            const userColor = document.getElementById('car-color').value;
+            const userBiome = document.getElementById('biome-select').value;
+            
+            // Hide UI
+            document.getElementById('start-screen').style.display = 'none';
+            document.getElementById('game-ui').style.display = 'block';
+
+            // Build Worlds
+            buildScenery(userBiome);
+            buildSecretWorld();
+
+            // Build Player
+            playerCar = {
+                mesh: createCar(userColor),
+                angle: 0,
+                offset: 8, 
+                speed: 0,
+                maxSpeed: 0.016, 
+                totalAngle: 0,
+                lap: 1,
+                isPlayer: true
+            };
+            scene.add(playerCar.mesh);
+            cars.push(playerCar);
+
+            // Attach Camera
+            playerCar.mesh.add(camera);
+            camera.position.set(0, 4.5, 14); 
+            camera.lookAt(0, 1.5, -10); // Look towards negative Z (the front of the car)
+
+            // Build AI (Start them with the player at the exact same angle)
+            const aiColors = [0x0055ff, 0xffffff, 0xffaa00]; 
+            const aiOffsets = [-12, -4, 12];
+            for(let i=0; i<3; i++) {
+                let ai = {
+                    mesh: createCar(aiColors[i]),
+                    angle: 0, 
+                    offset: aiOffsets[i],  
+                    speed: 0, 
+                    maxSpeed: 0.0085 + (Math.random() * 0.002), // Top speed
+                    totalAngle: 0, 
+                    lap: 1,
+                    isPlayer: false
+                };
+                scene.add(ai.mesh);
+                cars.push(ai);
+            }
+
+            // Start Loop
+            gameRunning = true;
+        }
+
+        function triggerSecretWorld() {
+            if (inSecretWorld) return;
+            inSecretWorld = true;
+            
+            // Swap visual groups
+            normalGroup.visible = false;
+            secretGroup.visible = true;
+
+            // Hide AI bots
+            cars.forEach(car => {
+                if (!car.isPlayer) car.mesh.visible = false;
+            });
+
+            // Update Sky/Fog for Jelly Bean Realm
+            scene.background = new THREE.Color(0x87cefa); // Bright blue sky
+            scene.fog = new THREE.FogExp2(0x87cefa, 0.0003);
+
+            // Update UI to free roam mode and remind player about swapped controls!
+            document.getElementById('sub-title').innerHTML = "Welcome to the Jelly Bean Realm!<br><strong>W / UP</strong> to Accelerate | <strong>S / DOWN</strong> to Reverse";
+            document.getElementById('pos-box').style.display = 'none';
+            document.getElementById('lap-box').style.display = 'none';
+            document.getElementById('gear-box').style.display = 'none';
+        }
+
+        // --- 6. Input Controls & Drift State ---
+        const keys = { w: false, a: false, s: false, d: false, ArrowUp: false, ArrowDown: false, ArrowLeft: false, ArrowRight: false, ' ': false, e: false, q: false };
+        let visualYaw = 0; 
+
+        window.addEventListener('keydown', e => { 
+            const k = e.key.toLowerCase();
+            if(keys.hasOwnProperty(k)) keys[k] = true; 
+            if(keys.hasOwnProperty(e.key)) keys[e.key] = true;
+
+            // Manual Gear Shifting (Only in normal world)
+            if (!inSecretWorld) {
+                if (k === 'e' && currentGear < 5 && gameRunning && !isGameOver) {
+                    currentGear++;
+                    document.getElementById('gear-display').innerText = currentGear;
+                }
+                if (k === 'q' && currentGear > 1 && gameRunning && !isGameOver) {
+                    currentGear--;
+                    document.getElementById('gear-display').innerText = currentGear;
+                }
+            }
+        });
+        window.addEventListener('keyup', e => { 
+            const k = e.key.toLowerCase();
+            if(keys.hasOwnProperty(k)) keys[k] = false; 
+            if(keys.hasOwnProperty(e.key)) keys[e.key] = false;
+        });
+
+        // --- 7. Collisions Setup ---
+        const pBox = new THREE.Box3();
+        const aBox = new THREE.Box3();
+
+        function handleCollision() {
+            if (Date.now() - lastCrashTime < 500) return;
+            playerCar.speed *= 0.8; 
+            lastCrashTime = Date.now();
+        }
+
+        // --- 8. Game Loop ---
+        function animate() {
+            requestAnimationFrame(animate);
+
+            if (gameRunning && !isGameOver) {
+                
+                // Speed Lines FX (Works universally)
+                speedLines.forEach(line => {
+                    line.position.z += playerCar.speed * 400; 
+                    if (playerCar.speed >= 0 && line.position.z > 10) {
+                        line.position.z = -100 - Math.random() * 50; 
+                    } else if (playerCar.speed < 0 && line.position.z < -150) {
+                        line.position.z = 10 + Math.random() * 20;
+                    }
+                });
+
+                // Camera FX
+                camera.fov = 65 + (Math.abs(playerCar.speed) / playerCar.maxSpeed) * 25; 
+                camera.updateProjectionMatrix();
+
+                // UI Speed Display
+                const displaySpeed = Math.abs(Math.floor((playerCar.speed / playerCar.maxSpeed) * 215)); 
+                document.getElementById('speed-display').innerText = displaySpeed;
+
+                // ============================================
+                // PHYSICS BRANCH: NORMAL RACETRACK vs FREE ROAM
+                // ============================================
+                if (!inSecretWorld) {
+                    // --- NORMAL POLAR PHYSICS ---
+
+                    // Secret World Trigger Check 
+                    // To turn left to hit the sign, you must drive OFF the inner edge of the track (offset < -15)
+                    const normalizedAngle = Math.abs(playerCar.totalAngle) % (Math.PI * 2);
+                    if (normalizedAngle > 2.7 && normalizedAngle < 3.6 && playerCar.offset < -15) {
+                        triggerSecretWorld();
+                    }
+
+                    // Acceleration
+                    if (keys.s || keys.ArrowDown) playerCar.speed += 0.0006; 
+                    if (keys.w || keys.ArrowUp) playerCar.speed -= 0.0008; 
+                    playerCar.speed *= 0.98; // Friction
+                    
+                    const currentMaxSpeed = gearMaxSpeeds[currentGear] || 0.016;
+                    if (playerCar.speed > currentMaxSpeed) playerCar.speed -= 0.0005; 
+                    playerCar.speed = Math.max(-0.018, Math.min(playerCar.speed, 0.018));
+
+                    // Drift Logic & Steering (Modifies Offset)
+                    let driftMultiplier = 1;
+                    let turningDir = 0; 
+                    if (keys[' ']) driftMultiplier = 2.0; 
+
+                    if (Math.abs(playerCar.speed) > 0.001) {
+                        const steerAmount = 1.0 * (playerCar.speed / playerCar.maxSpeed) * driftMultiplier;
+                        if (keys.a || keys.ArrowLeft) { playerCar.offset -= steerAmount; turningDir = 1; }
+                        if (keys.d || keys.ArrowRight) { playerCar.offset += steerAmount; turningDir = -1; }
+                        
+                        // Widened the invisible walls so you can actually drive off the track to hit the sign
+                        playerCar.offset = Math.max(-35, Math.min(35, playerCar.offset));
+                    }
+
+                    // Visual Drift Yaw 
+                    if (keys[' '] && turningDir !== 0 && Math.abs(playerCar.speed) > 0.003) {
+                        visualYaw = THREE.MathUtils.lerp(visualYaw, turningDir * 0.5, 0.1);
+                    } else {
+                        visualYaw = THREE.MathUtils.lerp(visualYaw, 0, 0.15);
+                    }
+
+                    // Update all cars on the ring
+                    cars.forEach(car => {
+                        if(!car.isPlayer) {
+                            car.speed -= 0.00015; 
+                            car.speed *= 0.99;
+                            car.speed = Math.max(-car.maxSpeed, Math.min(car.speed, 0));
+                        }
+                        
+                        car.angle += car.speed;
+                        car.totalAngle += car.speed;
+                        car.lap = Math.floor(Math.abs(car.totalAngle) / (Math.PI * 2)) + 1;
+
+                        const r = trackRadius + car.offset;
+                        const currentX = r * Math.cos(car.angle);
+                        const currentZ = r * -Math.sin(car.angle); 
+                        car.mesh.position.set(currentX, 0, currentZ);
+
+                        const lookAhead = 0.01; 
+                        const nextX = r * Math.cos(car.angle + lookAhead);
+                        const nextZ = r * -Math.sin(car.angle + lookAhead);
+                        car.mesh.lookAt(nextX, car.mesh.position.y, nextZ);
+
+                        if (car.isPlayer) car.mesh.rotateY(visualYaw);
+
+                        car.mesh.userData.wheels.forEach(wheel => {
+                            wheel.rotation.x -= car.speed * 30; 
+                        });
+
+                        // RACE WIN CONDITION
+                        if (car.lap > 3 && !raceFinished) {
+                            raceFinished = true;
+                            isGameOver = true;
+                            const gameOverScreen = document.getElementById('game-over');
+                            const title = gameOverScreen.querySelector('h2');
+                            const desc = gameOverScreen.querySelector('p');
+                            
+                            if (car.isPlayer) {
+                                title.innerText = "YOU WIN!";
+                                title.style.color = "#33ff33";
+                                desc.innerText = "You finished 1st place!";
+                            } else {
+                                title.innerText = "YOU LOSE!";
+                                title.style.color = "#ff3333";
+                                desc.innerText = "An opponent beat you to the finish line.";
+                            }
+                            
+                            gameOverScreen.style.display = 'flex';
+                            document.getElementById('game-ui').style.opacity = '0.2';
+                        }
+                    });
+
+                    // AI Collisions
+                    pBox.setFromObject(playerCar.mesh);
+                    pBox.expandByScalar(-0.6); 
+                    for(let i=0; i < cars.length; i++) {
+                        let ai = cars[i];
+                        if (ai.isPlayer) continue;
+                        aBox.setFromObject(ai.mesh);
+                        aBox.expandByScalar(-0.6);
+                        if(pBox.intersectsBox(aBox)) handleCollision();
+                    }
+
+                    // Update Lap UI
+                    document.getElementById('lap-display').innerText = Math.min(playerCar.lap, 3) + "/3";
+                    const sortedCars = [...cars].sort((a, b) => Math.abs(b.totalAngle) - Math.abs(a.totalAngle));
+                    const playerIndex = sortedCars.findIndex(c => c.isPlayer) + 1;
+                    let posText = "th";
+                    if(playerIndex === 1) posText = "st";
+                    if(playerIndex === 2) posText = "nd";
+                    if(playerIndex === 3) posText = "rd";
+                    document.getElementById('pos-display').innerText = playerIndex + posText;
+
+                } else {
+                    // --- SECRET FREE ROAM PHYSICS ---
+                    
+                    // Acceleration (Uncapped max speed for fun free roam!)
+                    // Buttons are SWITCHED in the secret world exactly as requested
+                    if (keys.w || keys.ArrowUp) playerCar.speed += 0.0006; 
+                    if (keys.s || keys.ArrowDown) playerCar.speed -= 0.0008; 
+                    
+                    playerCar.speed *= 0.98; // Friction
+                    playerCar.speed = Math.max(-0.025, Math.min(playerCar.speed, 0.025));
+
+                    // Steering changes the car's absolute rotation Y now
+                    if (Math.abs(playerCar.speed) > 0.001) {
+                        let steerAmount = 0.04 * (Math.abs(playerCar.speed) / playerCar.maxSpeed);
+                        if (keys[' ']) steerAmount *= 1.5; // Drift turn
+                        
+                        let turnDir = 0;
+                        if (keys.a || keys.ArrowLeft) turnDir = 1;
+                        if (keys.d || keys.ArrowRight) turnDir = -1;
+                        
+                        // Invert steering if driving backwards so it feels natural
+                        if (playerCar.speed < 0) turnDir *= -1;
+
+                        playerCar.mesh.rotation.y += steerAmount * turnDir;
+                    }
+
+                    // Move car forward along its local Z axis
+                    // Multiply speed by 300 to match the scale of the old polar speed
+                    playerCar.mesh.translateZ(-playerCar.speed * trackRadius);
+
+                    // Spin wheels
+                    playerCar.mesh.userData.wheels.forEach(wheel => {
+                        wheel.rotation.x -= playerCar.speed * 30; 
+                    });
+                }
+            }
+
+            renderer.render(scene, camera);
+        }
+
+        // Handle window resizing
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        // Initialize Render Loop
+        animate();
+    </script>
+</body>
+</html>
